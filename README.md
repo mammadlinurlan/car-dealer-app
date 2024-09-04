@@ -8,10 +8,6 @@ This is a car dealer application built with Next.js and React. The application a
 - [Project Architecture](#project-architecture)
 - [Installation](#installation)
 - [Running the Application](#running-the-application)
-- [Building the Application](#building-the-application)
-- [Technologies Used](#technologies-used)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
@@ -30,7 +26,7 @@ The application follows a modern front-end architecture using the following key 
 - **Axios**: Used for making API requests to fetch vehicle types.
 - **React Suspense**: Used to handle loading states gracefully.
 
-## run application
+## Running The Application
 
 First, run the development server:
 
