@@ -3,8 +3,14 @@
 import { useState, Suspense, lazy, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
+import axios from 'axios';
 
-const VehicleData = lazy(() => import('../../components/VehicleData'));
+const VehicleTypeDropdown = lazy(
+  () => import('@/components/VehicleTypeDropdown'),
+);
+const VehicleYearDropdown = lazy(
+  () => import('@/components/VehicleYearDropdown'),
+);
 
 export default function Home() {
   const [vehicleTypes, setVehicleTypes] = useState([]);
@@ -13,7 +19,31 @@ export default function Home() {
   const [selectedYear, setSelectedYear] = useState('');
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 
-  // Enable button when both type and year are selected
+  useEffect(() => {
+    axios
+      .get(
+        'https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json',
+      )
+      .then((response) => {
+        const types = response.data.Results.map((item) => {
+          return {
+            makeId: item?.MakeId,
+            makeName: item?.MakeName,
+          };
+        });
+        setVehicleTypes([...new Set(types)]);
+      })
+      .catch((error) => {
+        console.error('Error fetching vehicle types:', error);
+      });
+
+    const currentYear = new Date().getFullYear();
+    const yearsList = [];
+    for (let year = 2015; year <= currentYear; year++) {
+      yearsList.push(year);
+    }
+    setYears(yearsList);
+  }, [setVehicleTypes, setYears]);
   useEffect(() => {
     if (selectedType && selectedYear) {
       setIsButtonEnabled(true);
@@ -38,46 +68,21 @@ export default function Home() {
         </h1>
 
         <div className='flex flex-col items-center'>
-          <Suspense fallback={<div>Loading vehicle data...</div>}>
-            <VehicleData
-              setVehicleTypes={setVehicleTypes}
-              setYears={setYears}
+          <Suspense fallback={<div>Loading vehicle types...</div>}>
+            <VehicleTypeDropdown
+              vehicleTypes={vehicleTypes}
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
             />
           </Suspense>
 
-          <label className='mb-2'>
-            Vehicle Type:
-            <select
-              className='ml-2 p-2 border rounded text-black'
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              required
-            >
-              <option value=''>Select a type</option>
-              {vehicleTypes?.map((type) => (
-                <option key={type.makeId} value={type.makeId}>
-                  {type?.makeName}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className='mb-4'>
-            Model Year:
-            <select
-              className='ml-2 p-2 border rounded text-black'
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              required
-            >
-              <option value=''>Select a year</option>
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Suspense fallback={<div>Loading vehicle types...</div>}>
+            <VehicleYearDropdown
+              years={years}
+              selectedYear={selectedYear}
+              setSelectedYear={setSelectedYear}
+            />
+          </Suspense>
 
           <Link href={`/result/${selectedType}/${selectedYear}`}>
             <button

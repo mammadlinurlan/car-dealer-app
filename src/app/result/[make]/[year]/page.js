@@ -1,13 +1,16 @@
 import axios from 'axios';
+import VehicleList from '@/components/VehicleList';
 
 export default async function ResultsPage({ params }) {
   const { year, make } = params;
+
   let vehicles = [];
   try {
     const response = await axios.get(
       `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeIdYear/makeId/${make}/modelyear/${year}?format=json`,
     );
-    vehicles = response.data.Results || [];
+
+    vehicles = response.data.Results;
   } catch (error) {
     //  console.log(error.response.data.message);
   }
@@ -16,27 +19,7 @@ export default async function ResultsPage({ params }) {
       <h1 className='text-2xl pl-5 font-bold mb-4 text-black'>
         Results for vehicles with year {year} - makeId {make}
       </h1>
-      {vehicles?.length > 0 ? (
-        <ul className='list-disc pl-5'>
-          {vehicles?.map((vehicle) => (
-            <li
-              key={vehicle?.Model_ID}
-              className='mb-2 p-4 bg-white shadow rounded'
-            >
-              <p className='text-lg font-semibold text-gray-600'>
-                {vehicle?.Make_Name}
-              </p>
-              <p className='text-sm text-gray-600'>
-                Model: {vehicle?.Model_Name}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className='text-lg text-gray-700'>
-          No vehicles found for year {year} - with makeId {make}.
-        </p>
-      )}
+      <VehicleList vehicles={vehicles} />
     </div>
   );
 }
